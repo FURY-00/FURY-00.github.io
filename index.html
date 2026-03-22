@@ -517,10 +517,160 @@
     .page-footer{padding:1.5rem 2rem}
     .nav-links{gap:1.2rem}
   }
+  /* LOADER */
+  #loader {
+    position: fixed;
+    inset: 0;
+    background: #080b0f;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    animation: loaderFadeOut 0.6s ease 2.5s forwards;
+  }
+  @keyframes loaderFadeOut {
+    to { opacity: 0; pointer-events: none; visibility: hidden; }
+  }
+
+  /* SHATTER OVERLAY */
+  .shatter {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10;
+    opacity: 0;
+    animation: shatterAppear 0.1s ease 2s forwards;
+  }
+  @keyframes shatterAppear {
+    to { opacity: 1; }
+  }
+  .shard {
+    position: absolute;
+    background: rgba(0,212,255,0.15);
+    border: 1px solid rgba(0,212,255,0.5);
+    animation: shardFly 0.6s ease 2s forwards;
+    transform-origin: center;
+  }
+  @keyframes shardFly {
+    0%   { transform: translate(0,0) rotate(0deg) scale(1); opacity: 1; }
+    100% { transform: var(--fly); opacity: 0; }
+  }
+  .crack {
+    position: absolute;
+    background: rgba(0,212,255,0.8);
+    transform-origin: top left;
+    animation: crackGrow 0.3s ease 2s forwards;
+    opacity: 0;
+    box-shadow: 0 0 6px rgba(0,212,255,0.8);
+  }
+  @keyframes crackGrow {
+    0%   { opacity: 0; transform: scaleX(0); }
+    50%  { opacity: 1; }
+    100% { opacity: 0.6; transform: scaleX(1); }
+  }
+
+  /* ARC REACTOR */
+  .arc-reactor {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    animation: reactorShake 0.15s ease 1.8s infinite;
+  }
+  @keyframes reactorShake {
+    0%,100% { transform: translate(0,0); }
+    25%     { transform: translate(-3px, 2px); }
+    50%     { transform: translate(3px,-2px); }
+    75%     { transform: translate(-2px,-3px); }
+  }
+  .arc-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    animation: spin 2s linear infinite;
+  }
+  .arc-ring-1 {
+    inset: 0;
+    border-top-color: #00d4ff;
+    border-right-color: #00d4ff;
+    animation-duration: 1.5s;
+  }
+  .arc-ring-2 {
+    inset: 15px;
+    border-bottom-color: #00aacc;
+    border-left-color: #00aacc;
+    animation-duration: 2s;
+    animation-direction: reverse;
+  }
+  .arc-ring-3 {
+    inset: 30px;
+    border-top-color: #ffffff;
+    border-right-color: #ffffff;
+    animation-duration: 1s;
+  }
+  .arc-core {
+    position: absolute;
+    inset: 45px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ffffff 0%, #00d4ff 40%, #0066aa 100%);
+    box-shadow:
+      0 0 20px #00d4ff,
+      0 0 40px #00d4ff,
+      0 0 80px rgba(0,212,255,0.5);
+    animation: corePulse 1.5s ease-in-out infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes corePulse {
+    0%,100% { box-shadow: 0 0 20px #00d4ff, 0 0 40px #00d4ff, 0 0 80px rgba(0,212,255,0.5); }
+    50%     { box-shadow: 0 0 30px #00d4ff, 0 0 60px #00d4ff, 0 0 120px rgba(0,212,255,0.7); }
+  }
+
+  .loader-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 1rem;
+    color: #00d4ff;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    animation: textFlicker 2.5s ease forwards;
+  }
+  @keyframes textFlicker {
+    0%   { opacity: 0; }
+    15%  { opacity: 1; }
+    80%  { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
 </style>
 </head>
 <body>
 
+<!-- LOADER -->
+<div id="loader">
+  <!-- SHATTER EFFECT -->
+  <div class="shatter">
+    <div class="shard" style="width:60px;height:40px;top:20%;left:15%;--fly:translate(-180px,-120px) rotate(-45deg) scale(0.3)"></div>
+    <div class="shard" style="width:80px;height:30px;top:15%;left:45%;--fly:translate(20px,-200px) rotate(30deg) scale(0.2)"></div>
+    <div class="shard" style="width:50px;height:60px;top:20%;right:15%;--fly:translate(160px,-100px) rotate(60deg) scale(0.3)"></div>
+    <div class="shard" style="width:70px;height:35px;top:45%;left:8%;--fly:translate(-200px,30px) rotate(-30deg) scale(0.2)"></div>
+    <div class="shard" style="width:55px;height:55px;top:45%;right:8%;--fly:translate(200px,20px) rotate(50deg) scale(0.2)"></div>
+    <div class="shard" style="width:65px;height:40px;bottom:20%;left:18%;--fly:translate(-150px,150px) rotate(-60deg) scale(0.3)"></div>
+    <div class="shard" style="width:80px;height:30px;bottom:15%;left:45%;--fly:translate(10px,200px) rotate(20deg) scale(0.2)"></div>
+    <div class="shard" style="width:50px;height:50px;bottom:20%;right:18%;--fly:translate(160px,130px) rotate(70deg) scale(0.3)"></div>
+    <div class="crack" style="width:120px;height:1px;top:48%;left:30%;transform:rotate(-25deg)"></div>
+    <div class="crack" style="width:90px;height:1px;top:52%;left:40%;transform:rotate(40deg)"></div>
+    <div class="crack" style="width:80px;height:1px;top:44%;left:35%;transform:rotate(-10deg)"></div>
+    <div class="crack" style="width:100px;height:1px;top:56%;left:28%;transform:rotate(15deg)"></div>
+  </div>
+
+  <div class="arc-reactor">
+    <div class="arc-ring arc-ring-1"></div>
+    <div class="arc-ring arc-ring-2"></div>
+    <div class="arc-ring arc-ring-3"></div>
+    <div class="arc-core"></div>
+  </div>
+  <div class="loader-text">Hey, welcome — I'm Adittya</div>
+</div>
 <div class="grid-bg"></div>
 <div class="orb orb-1"></div>
 <div class="orb orb-2"></div>
