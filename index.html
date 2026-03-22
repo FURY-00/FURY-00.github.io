@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adittya Das — Engineering Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080b0f;
+    --surface: #0e1318;
+    --card: #131a22;
+    --border: #1e2a36;
+    --accent: #00d4ff;
+    --accent2: #ff6b35;
+    --text: #e8edf2;
+    --muted: #5a6a7a;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    overflow-x: hidden;
+  }
+
+  /* NOISE */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 9999; opacity: 0.4;
+  }
+
+  .grid-bg {
+    position: fixed; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridMove 20s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes gridMove { 0%{transform:translateY(0)} 100%{transform:translateY(60px)} }
+
+  .orb {
+    position: fixed; border-radius: 50%; filter: blur(80px);
+    pointer-events: none; z-index: 0;
+    animation: orbFloat 12s ease-in-out infinite;
+    transition: transform 0.4s ease-out;
+  }
+  .orb-1 { width:500px;height:500px;background:rgba(0,212,255,0.07);top:-100px;right:-100px; }
+  .orb-2 { width:400px;height:400px;background:rgba(255,107,53,0.05);bottom:20%;left:-100px;animation-delay:-6s; }
+  @keyframes orbFloat {
+    0%,100%{transform:translate(0,0) scale(1)}
+    33%{transform:translate(30px,-30px) scale(1.05)}
+    66%{transform:translate(-20px,20px) scale(0.95)}
+  }
+
+  /* ─── NAV ─────────────────────────────── */
+  nav {
+    position: fixed; top:0; left:0; right:0; z-index:200;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:1.2rem 4rem;
+    background:rgba(8,11,15,0.85); backdrop-filter:blur(24px);
+    border-bottom:1px solid var(--border);
+    animation: navSlideDown 0.8s ease forwards;
+  }
+  @keyframes navSlideDown { from{transform:translateY(-100%);opacity:0} to{transform:translateY(0);opacity:1} }
+
+  .nav-logo { font-family:var(--mono);font-size:0.85rem;color:var(--accent);letter-spacing:0.15em;text-transform:uppercase;cursor:pointer; }
+  .nav-links { display:flex;gap:2.5rem;list-style:none; }
+  .nav-links a {
+    font-family:var(--mono);font-size:0.75rem;color:var(--muted);
+    text-decoration:none;letter-spacing:0.1em;text-transform:uppercase;
+    transition:color 0.3s;position:relative;cursor:pointer;
+  }
+  .nav-links a::after { content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:var(--accent);transition:width 0.3s; }
+  .nav-links a:hover { color:var(--accent); }
+  .nav-links a:hover::after { width:100%; }
+  .nav-links a.active { color:var(--accent); }
+  .nav-links a.active::after { width:100%; }
+
+  /* ─── PAGE CONTAINER ─────────────────── */
+  #app {
+    position: fixed;
+    inset: 0;
+    perspective: 1400px;
+    z-index: 1;
+  }
+
+  /* ─── PAGE FLIP WRAPPER ──────────────── */
+  .page-stage {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+  }
+
+  /* Each "page" fills the screen */
+  .page {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-top: 5rem;
+    backface-visibility: hidden;
+    transform-origin: left center;
+    transition: transform 0.7s cubic-bezier(0.77,0,0.18,1), opacity 0.5s ease;
+  }
+
+  /* Active page: visible */
+  .page.active {
+    transform: rotateY(0deg);
+    opacity: 1;
+    pointer-events: all;
+    z-index: 10;
+  }
+
+  /* Outgoing page: flip away to the LEFT */
+  .page.flip-out {
+    transform: rotateY(-90deg);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  /* Incoming page: arrive from the RIGHT */
+  .page.flip-in {
+    transform: rotateY(90deg);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  /* Hidden pages (not in transition) */
+  .page.hidden {
+    transform: rotateY(90deg);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── PAGE FLASH OVERLAY ─────────────── */
+  #flash {
+    position: fixed; inset: 0; z-index: 150;
+    background: linear-gradient(135deg, rgba(0,212,255,0.08), rgba(255,107,53,0.05));
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.15s;
+  }
+  #flash.show { opacity: 1; }
+
+  /* ─── SECTION LAYOUT ─────────────────── */
+  .page-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 4rem 5rem;
+  }
+
+  .section-header {
+    display:flex; align-items:center; gap:1.5rem; margin-bottom:3rem;
+    animation: fadeUp 0.5s ease 0.1s both;
+  }
+  .section-num { font-family:var(--mono);font-size:0.65rem;color:var(--accent);letter-spacing:0.2em;border:1px solid var(--accent);padding:0.3rem 0.6rem; }
+  .section-title { font-family:var(--sans);font-size:clamp(1.8rem,3vw,2.6rem);font-weight:800;letter-spacing:-0.02em; }
+  .section-line { flex:1;height:1px;background:var(--border); }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeLeft { from{opacity:0;transform:translateX(40px)} to{opacity:1;transform:translateX(0)} }
+
+  /* ─── HERO PAGE ──────────────────────── */
+  #page-home {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 4rem;
+    max-width: 1200px;
+    width: 100%;
+    padding: 2rem 4rem;
+  }
+
+  .hero-tag {
+    font-family:var(--mono);font-size:0.72rem;color:var(--accent);
+    letter-spacing:0.25em;text-transform:uppercase;margin-bottom:1.5rem;
+    display:flex;align-items:center;gap:0.8rem;
+    animation:fadeUp 0.6s ease 0.3s both;
+  }
+  .hero-tag::before { content:'';width:30px;height:1px;background:var(--accent); }
+
+  .hero h1 {
+    font-family:var(--sans);font-size:clamp(3rem,5.5vw,5.5rem);font-weight:800;
+    line-height:1;letter-spacing:-0.03em;margin-bottom:1.5rem;
+    animation:fadeUp 0.6s ease 0.5s both;
+  }
+  .hero h1 .name { color:var(--text); }
+  .hero h1 .highlight { color:var(--accent);display:block;position:relative; }
+  .hero h1 .highlight::before,.hero h1 .highlight::after {
+    content:attr(data-text);position:absolute;left:0;top:0;width:100%;
+  }
+  .hero h1 .highlight::before { color:#ff6b35;clip-path:polygon(0 0,100% 0,100% 45%,0 45%);animation:glitch1 5s infinite;opacity:0; }
+  .hero h1 .highlight::after  { color:#00ffcc;clip-path:polygon(0 55%,100% 55%,100% 100%,0 100%);animation:glitch2 5s infinite;opacity:0; }
+  @keyframes glitch1 { 0%,88%,100%{transform:translate(0);opacity:0} 90%{transform:translate(-4px,1px);opacity:0.6} 93%{transform:translate(3px,-1px);opacity:0.6} 96%{transform:translate(0);opacity:0} }
+  @keyframes glitch2 { 0%,88%,100%{transform:translate(0);opacity:0} 91%{transform:translate(4px,-1px);opacity:0.5} 94%{transform:translate(-3px,1px);opacity:0.5} 97%{transform:translate(0);opacity:0} }
+
+  .hero-desc {
+    font-family:var(--mono);font-size:0.85rem;color:var(--muted);line-height:1.8;
+    max-width:480px;margin-bottom:2.5rem;
+    animation:fadeUp 0.6s ease 0.7s both;
+  }
+  .hero-cta { display:flex;gap:1.2rem;flex-wrap:wrap;animation:fadeUp 0.6s ease 0.9s both; }
+
+  .btn-primary {
+    padding:0.9rem 2rem;background:var(--accent);color:var(--bg);
+    font-family:var(--mono);font-size:0.75rem;font-weight:700;letter-spacing:0.12em;
+    text-transform:uppercase;text-decoration:none;border:none;cursor:pointer;
+    transition:all 0.3s;position:relative;overflow:hidden;
+    clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px));
+  }
+  .btn-primary::before {
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);
+    transform:translateX(-100%);transition:transform 0.5s;
+  }
+  .btn-primary:hover::before { transform:translateX(100%); }
+  .btn-primary:hover { background:#fff;transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,212,255,0.3); }
+
+  .btn-outline {
+    padding:0.9rem 2rem;background:transparent;color:var(--text);
+    font-family:var(--mono);font-size:0.75rem;letter-spacing:0.12em;
+    text-transform:uppercase;text-decoration:none;border:1px solid var(--border);
+    cursor:pointer;transition:all 0.3s;
+  }
+  .btn-outline:hover { border-color:var(--accent);color:var(--accent);box-shadow:0 0 20px rgba(0,212,255,0.1); }
+
+  .hero-visual { display:flex;justify-content:center;align-items:center;animation:fadeLeft 0.7s ease 0.5s both; }
+
+  .terminal-card {
+    background:var(--card);border:1px solid var(--border);
+    width:100%;max-width:420px;font-family:var(--mono);font-size:0.78rem;
+    overflow:hidden;box-shadow:0 0 60px rgba(0,212,255,0.06),0 30px 60px rgba(0,0,0,0.5);
+    animation:terminalGlow 4s ease-in-out infinite;
+  }
+  @keyframes terminalGlow {
+    0%,100%{box-shadow:0 0 40px rgba(0,212,255,0.05),0 30px 60px rgba(0,0,0,0.5)}
+    50%{box-shadow:0 0 80px rgba(0,212,255,0.12),0 30px 60px rgba(0,0,0,0.5)}
+  }
+  .terminal-header { background:var(--surface);padding:0.8rem 1.2rem;display:flex;align-items:center;gap:0.5rem;border-bottom:1px solid var(--border); }
+  .dot{width:10px;height:10px;border-radius:50%}
+  .dot-r{background:#ff5f57}.dot-y{background:#febc2e}.dot-g{background:#28c840}
+  .terminal-title{margin-left:auto;color:var(--muted);font-size:0.65rem;letter-spacing:0.1em}
+  .terminal-body{padding:1.5rem;line-height:2}
+  .t-prompt{color:var(--accent)}.t-key{color:#ff6b35}.t-str{color:#a8e6a3}.t-val{color:#7ec8e3}
+  .t-cursor{display:inline-block;width:8px;height:14px;background:var(--accent);animation:blink 1.2s infinite;vertical-align:middle;margin-left:2px}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+  /* ─── ABOUT PAGE ─────────────────────── */
+  .about-grid { display:grid;grid-template-columns:3fr 2fr;gap:4rem;align-items:start; }
+
+  .about-text p { font-family:var(--mono);font-size:0.85rem;color:var(--muted);line-height:2;margin-bottom:1.2rem; }
+  .about-text p span { color:var(--text); }
+
+  .edu-label { font-family:var(--mono);font-size:0.65rem;color:var(--accent);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:0.8rem;margin-top:2rem;display:block; }
+
+  .edu-card {
+    background:var(--card);border:1px solid var(--border);padding:1.2rem 1.5rem;
+    border-left:3px solid var(--border);margin-bottom:0.8rem;
+    transition:border-color 0.3s,transform 0.3s,box-shadow 0.3s;
+  }
+  .edu-card.current{border-left-color:var(--accent)}
+  .edu-card:hover{border-left-color:var(--accent);transform:translateX(6px);box-shadow:-4px 0 20px rgba(0,212,255,0.08)}
+  .edu-card-title{font-family:var(--sans);font-size:0.95rem;font-weight:700}
+  .edu-card-sub{font-family:var(--mono);font-size:0.72rem;color:var(--accent);margin:0.3rem 0}
+  .edu-card-detail{font-family:var(--mono);font-size:0.7rem;color:var(--muted)}
+
+  .about-details{background:var(--card);border:1px solid var(--border);padding:2rem;position:sticky;top:1rem}
+  .detail-row{display:flex;justify-content:space-between;align-items:center;padding:0.8rem 0;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:0.75rem}
+  .detail-row:last-child{border-bottom:none}
+  .detail-key{color:var(--muted);letter-spacing:0.08em}
+  .detail-val{color:var(--accent)}
+
+  /* ─── SKILLS PAGE (REVAMPED) ─────────── */
+  .skills-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 2.5rem;
+    border: 1px solid var(--border);
+    width: fit-content;
+  }
+
+  .skill-tab {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.7rem 1.4rem;
+    cursor: pointer;
+    color: var(--muted);
+    background: transparent;
+    border: none;
+    border-right: 1px solid var(--border);
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .skill-tab:last-child { border-right: none; }
+  .skill-tab::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+    z-index: 0;
+  }
+  .skill-tab span { position: relative; z-index: 1; }
+  .skill-tab:hover { color: var(--accent); }
+  .skill-tab.active { color: var(--bg); }
+  .skill-tab.active::before { transform: scaleX(1); }
+
+  .skill-panels { position: relative; }
+
+  .skill-panel { display: none; }
+  .skill-panel.active { display: block; animation: panelFade 0.4s ease; }
+  @keyframes panelFade { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+  /* Skill items with progress bar style */
+  .skill-items { display: flex; flex-direction: column; gap: 1rem; }
+
+  .skill-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 1.2rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s;
+    cursor: default;
+  }
+
+  .skill-item::after {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: var(--fill, 60%);
+    background: linear-gradient(90deg, rgba(0,212,255,0.06), transparent);
+    transition: width 0.8s cubic-bezier(0.25,1,0.5,1);
+    z-index: 0;
+  }
+
+  .skill-item:hover { border-color: rgba(0,212,255,0.35); transform: translateX(4px); }
+
+  .skill-icon {
+    font-size: 1.4rem;
+    width: 2.5rem;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+  }
+
+  .skill-info { flex: 1; position: relative; z-index: 1; }
+  .skill-name { font-family:var(--sans);font-size:1rem;font-weight:700;margin-bottom:0.2rem; }
+  .skill-desc { font-family:var(--mono);font-size:0.65rem;color:var(--muted);letter-spacing:0.05em; }
+
+  .skill-level {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.7rem;
+    border: 1px solid;
+    position: relative; z-index: 1;
+    flex-shrink: 0;
+  }
+  .skill-level.confident { color:#28c840;border-color:rgba(40,200,64,0.4); }
+  .skill-level.learning  { color:var(--accent);border-color:rgba(0,212,255,0.35); }
+  .skill-level.familiar  { color:var(--accent2);border-color:rgba(255,107,53,0.35); }
+
+  /* Radar / category side panel */
+  .skills-layout { display: grid; grid-template-columns: 1fr 280px; gap: 2rem; align-items: start; }
+
+  .skills-right { display: flex; flex-direction: column; gap: 1rem; }
+
+  .category-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 1.2rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .category-card:hover { border-color: rgba(0,212,255,0.3); }
+  .category-card::before {
+    content: '';
+    position: absolute; left:0; top:0; bottom:0; width:2px;
+    background: var(--accent);
+    transform: scaleY(0); transform-origin: bottom;
+    transition: transform 0.4s ease;
+  }
+  .category-card:hover::before { transform: scaleY(1); }
+  .cat-title { font-family:var(--mono);font-size:0.6rem;color:var(--accent);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:0.8rem; }
+  .cat-tags { display:flex;flex-wrap:wrap;gap:0.4rem; }
+  .cat-tag {
+    font-family:var(--mono);font-size:0.62rem;color:var(--muted);
+    background:var(--surface);border:1px solid var(--border);
+    padding:0.2rem 0.5rem;letter-spacing:0.05em;
+    transition:all 0.2s;cursor:default;
+  }
+  .cat-tag:hover { color:var(--accent);border-color:var(--accent); }
+
+  /* ─── EXPERIENCE PAGE ────────────────── */
+  .timeline{position:relative;padding-left:2rem}
+  .timeline::before {
+    content:'';position:absolute;left:0;top:0;bottom:0;width:1px;
+    background:linear-gradient(to bottom,var(--accent),var(--border) 80%,transparent);
+  }
+  .timeline-item{position:relative;padding-left:2.5rem;padding-bottom:3rem}
+  .timeline-item:last-child{padding-bottom:0}
+  .timeline-dot{position:absolute;left:-2.55rem;top:0.4rem;width:10px;height:10px;background:var(--bg);border:2px solid var(--accent);transform:rotate(45deg)}
+  .timeline-dot.current{background:var(--accent);animation:dotPulse 2s ease-in-out infinite}
+  @keyframes dotPulse{0%,100%{box-shadow:0 0 8px var(--accent)}50%{box-shadow:0 0 20px var(--accent),0 0 40px rgba(0,212,255,0.3)}}
+  .timeline-period{font-family:var(--mono);font-size:0.65rem;color:var(--accent);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.5rem}
+  .timeline-role{font-family:var(--sans);font-size:1.2rem;font-weight:700;margin-bottom:0.3rem}
+  .timeline-company{font-family:var(--mono);font-size:0.8rem;color:var(--muted);margin-bottom:1rem}
+  .timeline-desc{font-family:var(--mono);font-size:0.78rem;color:var(--muted);line-height:1.9}
+  .timeline-desc li{margin-bottom:0.4rem;padding-left:1rem;position:relative;list-style:none}
+  .timeline-desc li::before{content:'▸';position:absolute;left:0;color:var(--accent2)}
+
+  /* ─── PROJECTS PAGE ──────────────────── */
+  .projects-empty {
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:5rem 2rem;border:1px dashed var(--border);text-align:center;
+    position:relative;overflow:hidden;
+  }
+  .projects-empty::before {
+    content:'';position:absolute;inset:0;
+    background:radial-gradient(circle at 50% 50%,rgba(0,212,255,0.03) 0%,transparent 70%);
+    animation:emptyPulse 3s ease-in-out infinite;
+  }
+  @keyframes emptyPulse{0%,100%{opacity:0.5}50%{opacity:1}}
+  .empty-icon{font-size:3rem;margin-bottom:1.5rem;opacity:0.3;animation:iconFloat 3s ease-in-out infinite}
+  @keyframes iconFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  .empty-title{font-family:var(--sans);font-size:1.4rem;font-weight:700;color:var(--muted);margin-bottom:0.8rem}
+  .empty-sub{font-family:var(--mono);font-size:0.75rem;color:var(--muted);opacity:0.6;line-height:1.8}
+  .empty-badge {
+    margin-top:2rem;font-family:var(--mono);font-size:0.65rem;color:var(--accent);
+    border:1px solid rgba(0,212,255,0.3);padding:0.4rem 1rem;letter-spacing:0.15em;text-transform:uppercase;
+    animation:badgeBlink 2s ease-in-out infinite;
+  }
+  @keyframes badgeBlink{0%,100%{border-color:rgba(0,212,255,0.3);color:var(--accent)}50%{border-color:rgba(0,212,255,0.7);color:#fff}}
+
+  /* ─── FOOTER ─────────────────────────── */
+  .page-footer {
+    border-top:1px solid var(--border);padding:1.5rem 4rem;
+    display:flex;justify-content:space-between;align-items:center;
+    background:var(--surface);
+  }
+  .footer-left{font-family:var(--mono);font-size:0.7rem;color:var(--muted)}
+  .footer-left span{color:var(--accent)}
+
+  /* ─── PAGE INDICATOR ─────────────────── */
+  .page-dots {
+    position: fixed;
+    right: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    z-index: 150;
+  }
+  .page-dot {
+    width: 6px; height: 6px;
+    border: 1px solid var(--muted);
+    transform: rotate(45deg);
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .page-dot.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  /* Stagger animations for page content */
+  .stagger > * {
+    opacity: 0;
+    transform: translateY(18px);
+    animation: fadeUp 0.5s ease forwards;
+  }
+  .stagger > *:nth-child(1){animation-delay:0.1s}
+  .stagger > *:nth-child(2){animation-delay:0.2s}
+  .stagger > *:nth-child(3){animation-delay:0.3s}
+  .stagger > *:nth-child(4){animation-delay:0.4s}
+  .stagger > *:nth-child(5){animation-delay:0.5s}
+
+  @media(max-width:900px){
+    nav{padding:1rem 2rem}
+    .hero-grid{grid-template-columns:1fr;padding:2rem}
+    .hero-visual{display:none}
+    .about-grid{grid-template-columns:1fr}
+    .skills-layout{grid-template-columns:1fr}
+    .skills-right{display:none}
+    .page-inner{padding:2rem 1.5rem 4rem}
+    .page-footer{padding:1.5rem 2rem}
+    .nav-links{gap:1.2rem}
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div id="flash"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo" onclick="goTo('home')">// ADITTYA DAS</div>
+  <ul class="nav-links">
+    <li><a onclick="goTo('about')"   data-page="about">About</a></li>
+    <li><a onclick="goTo('skills')"  data-page="skills">Skills</a></li>
+    <li><a onclick="goTo('exp')"     data-page="exp">Experience</a></li>
+    <li><a onclick="goTo('projects')"data-page="projects">Projects</a></li>
+  </ul>
+</nav>
+
+<!-- PAGE DOTS -->
+<div class="page-dots">
+  <div class="page-dot active" onclick="goTo('home')"    data-dot="home"></div>
+  <div class="page-dot"        onclick="goTo('about')"   data-dot="about"></div>
+  <div class="page-dot"        onclick="goTo('skills')"  data-dot="skills"></div>
+  <div class="page-dot"        onclick="goTo('exp')"     data-dot="exp"></div>
+  <div class="page-dot"        onclick="goTo('projects')"data-dot="projects"></div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- APP                                    -->
+<!-- ═══════════════════════════════════════ -->
+<div id="app">
+
+<!-- HOME PAGE -->
+<div class="page active" id="page-home">
+  <div style="display:flex;align-items:center;justify-content:center;height:100%;">
+    <div class="hero-grid">
+      <div class="hero-content">
+        <div class="hero-tag"></div>
+        <h1>
+          <span class="name">Hi, I'm</span>
+          <span class="highlight" data-text="Adittya Das">Adittya Das</span>
+        </h1>
+        <p class="hero-desc">
+            Mechanical Engineering Undergraduate at BUET. Building skills and struggling to have a decent CGPA.
+        </p>
+        <div class="hero-cta">
+          <button class="btn-primary" onclick="goTo('exp')">My Journey</button>
+          <button class="btn-outline" onclick="goTo('about')">About Me</button>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="terminal-card">
+          <div class="terminal-header">
+            <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+            <span class="terminal-title">profile</span>
+          </div>
+          <div class="terminal-body">
+            <div><span class="t-prompt">$</span></div>
+            <div>&nbsp;</div>
+            <div>{</div>
+            <div>&nbsp;&nbsp;<span class="t-key">"name"</span>: <span class="t-str">"Adittya Das"</span>,</div>
+            <div>&nbsp;&nbsp;<span class="t-key">"degree"</span>: <span class="t-str">"B.Sc. Mechanical Engg."</span>,</div>
+            <div>&nbsp;&nbsp;<span class="t-key">"university"</span>: <span class="t-str">"BUET"</span>,</div>
+            <div>&nbsp;&nbsp;<span class="t-key">"location"</span>: <span class="t-str">"Dhaka, Bangladesh 🇧🇩"</span>,</div>
+            <div>&nbsp;&nbsp;<span class="t-key">"interests"</span>: </div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">Even</span>,</div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">I don't</span>,</div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">know</span></div>
+            <div>&nbsp;&nbsp;</div>
+            <div>&nbsp;&nbsp;<span class="t-key">"status"</span>: <span class="t-val">learning &amp; growing</span></div>
+            <div>}</div>
+            <div>&nbsp;</div>
+            <div><span class="t-prompt">$</span> <span class="t-cursor"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT PAGE -->
+<div class="page hidden" id="page-about">
+  <div class="page-inner">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2 class="section-title">About Me</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="about-grid stagger">
+      <div class="about-text">
+        <p>I'm <span>Adittya Das</span>, a Mechanical Engineering undergraduate at <span>Bangladesh University of Engineering and Technology (BUET)</span>, based in Dhaka,Bangladesh. I completed my SSC from <span>Chattogram Government High School</span> and HSC from <span>Ispahani Public School and College</span>, both with a <span>GPA of 5.00</span>.</p>
+      <p>My interests lie deeply in <span>thermal systems and materials science</span> . I'm currently building my skills in <span>Pandas, Matplotlib, Seaborn, and CoolProp</span> — still a rookie in most of these, but learning fast and enjoying every step of it.</p>
+      <p>On the design side, I'm confident with <span>AutoCAD and SolidWorks</span>.Black People call me <span>Racist</span> for no reason.</p>
+        <span class="edu-label">// Education</span>
+        <div class="edu-card current">
+          <div class="edu-card-title">Bangladesh University of Engineering and Technology</div>
+          <div class="edu-card-sub">B.Sc. in Mechanical Engineering — In Progress</div>
+          <div class="edu-card-detail">Undergraduate · BUET, Dhaka</div>
+        </div>
+        <div class="edu-card">
+          <div class="edu-card-title">Ispahani Public School and College</div>
+          <div class="edu-card-sub">HSC — GPA 5.00 / 5.00</div>
+          <div class="edu-card-detail">Higher Secondary Certificate · Chattogram</div>
+        </div>
+        <div class="edu-card">
+          <div class="edu-card-title">Chattogram Government High School</div>
+          <div class="edu-card-sub">SSC — GPA 5.00 / 5.00</div>
+          <div class="edu-card-detail">Secondary School Certificate · Chattogram</div>
+        </div>
+      </div>
+      <div class="about-details">
+        <div class="detail-row"><span class="detail-key">// STATUS</span><span class="detail-val">Undergraduate</span></div>
+        <div class="detail-row"><span class="detail-key">// UNIVERSITY</span><span class="detail-val">BUET</span></div>
+        <div class="detail-row"><span class="detail-key">// LOCATION</span><span class="detail-val">Chattogram, BD</span></div>
+        <div class="detail-row"><span class="detail-key">// INTERESTS</span><span class="detail-val">Thermo · Materials</span></div>
+        <div class="detail-row"><span class="detail-key">// SSC</span><span class="detail-val">GPA 5.00</span></div>
+        <div class="detail-row"><span class="detail-key">// HSC</span><span class="detail-val">GPA 5.00</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer"><div class="footer-left"><span>// ADITTYA DAS</span></div></div>
+</div>
+
+<!-- SKILLS PAGE -->
+<div class="page hidden" id="page-skills">
+  <div class="page-inner">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2 class="section-title">Skills</h2>
+      <div class="section-line"></div>
+    </div>
+
+    <!-- Tab bar -->
+    <div class="skills-tabs" id="skillTabs">
+      <button class="skill-tab active" data-panel="languages"><span>Languages</span></button>
+      <button class="skill-tab" data-panel="data"><span>Data & Analysis</span></button>
+      <button class="skill-tab" data-panel="tools"><span>Eng. Tools</span></button>
+      <button class="skill-tab" data-panel="knowledge"><span>Knowledge</span></button>
+      <button class="skill-tab" data-panel="soft"><span>Soft Skills</span></button>
+    </div>
+
+    <div class="skills-layout">
+      <!-- Left: skill items -->
+      <div class="skill-panels">
+
+        <div class="skill-panel active" id="panel-languages">
+          <div class="skill-items">
+            <div class="skill-item" style="--fill:55%">
+              <div class="skill-icon">🇨</div>
+              <div class="skill-info"><div class="skill-name">C</div><div class="skill-desc">Systems programming · Problem solving</div></div>
+              <div class="skill-level familiar">Familiar</div>
+            </div>
+            <div class="skill-item" style="--fill:60%">
+              <div class="skill-icon">🐍</div>
+              <div class="skill-info"><div class="skill-name">Python</div><div class="skill-desc">Data scripts · Engineering calculations</div></div>
+              <div class="skill-level learning">Learning</div>
+            </div>
+            <div class="skill-item" style="--fill:45%">
+              <div class="skill-icon">🌐</div>
+              <div class="skill-info"><div class="skill-name">HTML</div><div class="skill-desc">Web structure · Markup</div></div>
+              <div class="skill-level familiar">Learning</div>
+            </div>
+            <div class="skill-item" style="--fill:40%">
+              <div class="skill-icon">🎨</div>
+              <div class="skill-info"><div class="skill-name">CSS</div><div class="skill-desc">Styling · Layouts</div></div>
+              <div class="skill-level familiar">Learning</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="skill-panel" id="panel-data">
+          <div class="skill-items">
+            <div class="skill-item" style="--fill:55%">
+              <div class="skill-icon">🐼</div>
+              <div class="skill-info"><div class="skill-name">Pandas</div><div class="skill-desc">DataFrames · Filtering · Groupby · Analysis</div></div>
+              <div class="skill-level learning">Learning</div>
+            </div>
+            <div class="skill-item" style="--fill:45%">
+              <div class="skill-icon">📊</div>
+              <div class="skill-info"><div class="skill-name">Matplotlib</div><div class="skill-desc">Plots · Engineering charts</div></div>
+              <div class="skill-level learning">Learning</div>
+            </div>
+            <div class="skill-item" style="--fill:40%">
+              <div class="skill-icon">🎨</div>
+              <div class="skill-info"><div class="skill-name">Seaborn</div><div class="skill-desc">Statistical visualisation</div></div>
+              <div class="skill-level learning">Learning</div>
+            </div>
+            <div class="skill-item" style="--fill:50%">
+              <div class="skill-icon">❄️</div>
+              <div class="skill-info"><div class="skill-name">CoolProp</div><div class="skill-desc">Thermophysical properties · Refrigeration cycles</div></div>
+              <div class="skill-level learning">Learning</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="skill-panel" id="panel-tools">
+          <div class="skill-items">
+            <div class="skill-item" style="--fill:78%">
+              <div class="skill-icon">📐</div>
+              <div class="skill-info"><div class="skill-name">AutoCAD</div><div class="skill-desc">2D/3D engineering drawings · Technical drafting</div></div>
+              <div class="skill-level confident">Confident</div>
+            </div>
+            <div class="skill-item" style="--fill:72%">
+              <div class="skill-icon">🔩</div>
+              <div class="skill-info"><div class="skill-name">SolidWorks</div><div class="skill-desc">3D modelling · Part assembly · Simulation</div></div>
+              <div class="skill-level confident">Confident</div>
+            </div>
+            <div class="skill-item" style="--fill:42%">
+              <div class="skill-icon">🔬</div>
+              <div class="skill-info"><div class="skill-name">COMSOL</div><div class="skill-desc">Multiphysics simulation · FEM analysis</div></div>
+              <div class="skill-level familiar">Learning</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="skill-panel" id="panel-knowledge">
+          <div class="skill-items">
+            <div class="skill-item" style="--fill:70%">
+              <div class="skill-icon">🔥</div>
+              <div class="skill-info"><div class="skill-name">Thermodynamics</div><div class="skill-desc">Heat engines · Cycles · Energy systems</div></div>
+              <div class="skill-level confident">Confident</div>
+            </div>
+            <div class="skill-item" style="--fill:65%">
+              <div class="skill-icon">⚙️</div>
+              <div class="skill-info"><div class="skill-name">Engineering Mechanics</div><div class="skill-desc">Statics · Dynamics · Force analysis</div></div>
+              <div class="skill-level confident">Confident</div>
+            </div>
+            <div class="skill-item" style="--fill:62%">
+              <div class="skill-icon">🧱</div>
+              <div class="skill-info"><div class="skill-name">Material Science</div><div class="skill-desc">Properties · Behaviour · Failure analysis</div></div>
+              <div class="skill-level confident">Learning</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="skill-panel" id="panel-soft">
+          <div class="skill-items">
+            <div class="skill-item" style="--fill:80%">
+              <div class="skill-icon">🧩</div>
+              <div class="skill-info"><div class="skill-name">Problem Solving</div><div class="skill-desc">Breaking down complex engineering challenges</div></div>
+              <div class="skill-level confident">Confident</div>
+            </div>
+            <div class="skill-item" style="--fill:75%">
+              <div class="skill-icon">🤝</div>
+              <div class="skill-info"><div class="skill-name">Team Work</div><div class="skill-desc">Collaborative projects · Group assignments</div></div>
+              <div class="skill-level confident">Confident</div>
+            </div>
+              <div class="skill-item" style="--fill:75%">
+              <div class="skill-icon">🫱🏻‍🫲🏿</div>
+              <div class="skill-info"><div class="skill-name">Bullying People</div><div class="skill-desc">For fun purposes </div></div>
+              <div class="skill-level confident">Confident</div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right: category overview cards -->
+      <div class="skills-right">
+        <div class="category-card">
+          <div class="cat-title">// Level Guide</div>
+          <div style="display:flex;flex-direction:column;gap:0.6rem;margin-top:0.5rem;">
+            <div style="display:flex;align-items:center;gap:0.6rem;font-family:var(--mono);font-size:0.65rem;">
+              <span style="color:#28c840;border:1px solid rgba(40,200,64,0.4);padding:0.15rem 0.5rem;">Confident</span>
+              <span style="color:var(--muted)">Use daily / rely on it</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.6rem;font-family:var(--mono);font-size:0.65rem;">
+              <span style="color:var(--accent);border:1px solid rgba(0,212,255,0.35);padding:0.15rem 0.5rem;">Learning</span>
+              <span style="color:var(--muted)">Actively building skill</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.6rem;font-family:var(--mono);font-size:0.65rem;">
+              <span style="color:var(--accent2);border:1px solid rgba(255,107,53,0.35);padding:0.15rem 0.5rem;">Familiar</span>
+              <span style="color:var(--muted)">Know the basics</span>
+            </div>
+          </div>
+        </div>
+        <div class="category-card">
+          <div class="cat-title">// All Skills</div>
+          <div class="cat-tags">
+            <span class="cat-tag">C</span><span class="cat-tag">Python</span><span class="cat-tag">HTML</span><span class="cat-tag">CSS</span>
+            <span class="cat-tag">Pandas</span><span class="cat-tag">Matplotlib</span><span class="cat-tag">Seaborn</span><span class="cat-tag">CoolProp</span>
+            <span class="cat-tag">AutoCAD</span><span class="cat-tag">SolidWorks</span><span class="cat-tag">COMSOL</span>
+            <span class="cat-tag">Thermodynamics</span><span class="cat-tag">Eng. Mechanics</span><span class="cat-tag">Material Science</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer"><div class="footer-left"><span>// ADITTYA DAS</span></div></div>
+</div>
+
+<!-- EXPERIENCE PAGE -->
+<div class="page hidden" id="page-exp">
+  <div class="page-inner">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2 class="section-title">Experience</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="timeline stagger">
+      <div class="timeline-item">
+        <div class="timeline-dot current"></div>
+        <div class="timeline-period">2022 — Present</div>
+        <div class="timeline-role">Undergraduate Student — Mechanical Engineering</div>
+        <div class="timeline-company">Bangladesh University of Engineering and Technology (BUET) · Dhaka, Bangladesh</div>
+        <ul class="timeline-desc">
+          <li>Pursuing a degree in Mechanical Engineering.</li>
+          <li>Conducting data-driven analysis on materials science datasets using Python and pandas.</li>
+          <li>Applying CoolProp for thermophysical property calculations in refrigeration cycle assignments.</li>
+          <li>Building data visualisation reports for academic and personal projects.</li>
+          <li>Assembled a soccer-bot from scratch with minimal prior knowledge of robotics — learned everything hands-on along the way.</li>
+        </ul>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-period">2022</div>
+        <div class="timeline-role">Engineering Fundamentals</div>
+        <div class="timeline-company">Academic Foundation</div>
+        <ul class="timeline-desc">
+          <li>Built strong foundations in thermodynamics, engineering mechanics, and engineering mathematics.</li>
+          <li>Developed technical writing and documentation skills through practical reports and coursework.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer"><div class="footer-left"><span>// ADITTYA DAS</span></div></div>
+</div>
+
+<!-- PROJECTS PAGE -->
+<div class="page hidden" id="page-projects">
+  <div class="page-inner">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2 class="section-title">Projects</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="projects-empty">
+      <div class="empty-icon">⚙️</div>
+      <div class="empty-title">No projects yet.</div>
+      <p class="empty-sub">
+        Still in the early stages — focused on learning,<br>
+        building foundations, and figuring things out.
+      </p>
+      <div class="empty-badge">// work in progress</div>
+    </div>
+  </div>
+  <div class="page-footer"><div class="footer-left"><span>// ADITTYA DAS</span></div></div>
+</div>
+
+</div><!-- end #app -->
+
+<script>
+  // ─── PAGE FLIP SPA ──────────────────────────────────
+  const pages   = ['home','about','skills','exp','projects'];
+  let current   = 'home';
+  let animating = false;
+
+  function goTo(target) {
+    if (target === current || animating) return;
+    animating = true;
+
+    const flash = document.getElementById('flash');
+    const outEl = document.getElementById(`page-${current}`);
+    const inEl  = document.getElementById(`page-${target}`);
+
+    // Flash overlay
+    flash.classList.add('show');
+    setTimeout(() => flash.classList.remove('show'), 200);
+
+    // Determine direction (forward/back by index)
+    const fromIdx = pages.indexOf(current);
+    const toIdx   = pages.indexOf(target);
+    const forward = toIdx > fromIdx;
+
+    // Setup incoming page
+    inEl.classList.remove('hidden');
+    inEl.classList.add('flip-in');
+    inEl.style.transform = forward ? 'rotateY(90deg)' : 'rotateY(-90deg)';
+
+    // Flip out current
+    outEl.classList.remove('active');
+    outEl.classList.add('flip-out');
+    outEl.style.transform = forward ? 'rotateY(-90deg)' : 'rotateY(90deg)';
+
+    // Scroll incoming page to top
+    inEl.scrollTop = 0;
+
+    // Mid-animation: swap
+    setTimeout(() => {
+      inEl.style.transform = 'rotateY(0deg)';
+      inEl.style.opacity   = '1';
+      inEl.classList.remove('flip-in');
+      inEl.classList.add('active');
+
+      outEl.classList.remove('flip-out');
+      outEl.classList.add('hidden');
+      outEl.style.transform = '';
+      outEl.style.opacity   = '';
+    }, 50);
+
+    // Done
+    setTimeout(() => {
+      animating = false;
+      current   = target;
+      updateNav();
+
+      // Re-trigger stagger animations
+      inEl.querySelectorAll('.stagger > *').forEach(el => {
+        el.style.animation = 'none';
+        el.offsetHeight; // reflow
+        el.style.animation = '';
+      });
+    }, 750);
+  }
+
+  function updateNav() {
+    document.querySelectorAll('.nav-links a').forEach(a => {
+      a.classList.toggle('active', a.dataset.page === current);
+    });
+    document.querySelectorAll('.page-dot').forEach(d => {
+      d.classList.toggle('active', d.dataset.dot === current);
+    });
+  }
+
+  // ─── SKILL TABS ──────────────────────────────────────
+  document.getElementById('skillTabs').addEventListener('click', e => {
+    const tab = e.target.closest('.skill-tab');
+    if (!tab) return;
+    const panel = tab.dataset.panel;
+
+    document.querySelectorAll('.skill-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.skill-panel').forEach(p => p.classList.remove('active'));
+
+    tab.classList.add('active');
+    document.getElementById(`panel-${panel}`).classList.add('active');
+  });
+
+  // ─── MOUSE PARALLAX ──────────────────────────────────
+  document.addEventListener('mousemove', e => {
+    const x = (e.clientX / window.innerWidth  - 0.5) * 25;
+    const y = (e.clientY / window.innerHeight - 0.5) * 25;
+    document.querySelector('.orb-1').style.transform = `translate(${x}px,${y}px)`;
+    document.querySelector('.orb-2').style.transform = `translate(${-x*.6}px,${-y*.6}px)`;
+  });
+
+  // ─── KEYBOARD NAVIGATION ────────────────────────────
+  document.addEventListener('keydown', e => {
+    const idx = pages.indexOf(current);
+    if ((e.key === 'ArrowRight' || e.key === 'ArrowDown') && idx < pages.length - 1) goTo(pages[idx + 1]);
+    if ((e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   && idx > 0)                goTo(pages[idx - 1]);
+  });
+</script>
+</body>
+</html>
