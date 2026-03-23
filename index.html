@@ -685,6 +685,7 @@
     <li><a onclick="goTo('skills')"  data-page="skills">Skills</a></li>
     <li><a onclick="goTo('exp')"     data-page="exp">Experience</a></li>
     <li><a onclick="goTo('projects')"data-page="projects">Projects</a></li>
+    <li><a onclick="goTo('achieve')" data-page="achieve">Achievements</a></li>
   </ul>
 </nav>
 
@@ -695,6 +696,7 @@
   <div class="page-dot"        onclick="goTo('skills')"  data-dot="skills"></div>
   <div class="page-dot"        onclick="goTo('exp')"     data-dot="exp"></div>
   <div class="page-dot"        onclick="goTo('projects')"data-dot="projects"></div>
+  <div class="page-dot"        onclick="goTo('achieve')" data-dot="achieve"></div>
 </div>
 
 <!-- ═══════════════════════════════════════ -->
@@ -1025,12 +1027,32 @@
   </div>
   <div class="page-footer"><div class="footer-left"><span>// ADITTYA DAS</span></div></div>
 </div>
-
+<!-- ACHIEVEMENTS PAGE -->
+<div class="page hidden" id="page-achieve">
+  <div class="page-inner">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2 class="section-title">Achievements & Certificates</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="projects-empty">
+      <div class="empty-icon">🏅</div>
+      <div class="empty-title">No achievements yet.</div>
+      <p class="empty-sub">
+        Still early in the journey — working hard<br>
+        and collecting experiences along the way.<br>
+        This space will fill up soon.
+      </p>
+      <div class="empty-badge">// coming soon</div>
+    </div>
+  </div>
+  <div class="page-footer"><div class="footer-left"><span>// ADITTYA DAS</span></div></div>
+</div>
 </div><!-- end #app -->
 
 <script>
   // ─── PAGE FLIP SPA ──────────────────────────────────
-  const pages   = ['home','about','skills','exp','projects'];
+  const pages   = ['home','about','skills','exp','projects','achieve'];
   let current   = 'home';
   let animating = false;
 
