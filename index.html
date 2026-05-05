@@ -303,6 +303,20 @@
   .skill-item:hover { border-color: rgba(255,255,255,0.35); transform: translateX(4px); }
   .skill-icon { font-size: 1.4rem; width: 2.5rem; height: 2.5rem; text-align: center; position: relative; z-index: 1; flex-shrink: 0; display:flex; align-items:center; justify-content:center; }
   .skill-icon img { width: 24px; height: 24px; object-fit: contain; filter: brightness(0) invert(1); }
+  .skill-tag-icon {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 0.3rem 0.5rem;
+    min-width: 2.2rem;
+    text-align: center;
+    letter-spacing: 0.02em;
+    transition: border-color 0.3s, color 0.3s;
+  }
+  .skill-item:hover .skill-tag-icon { border-color: var(--accent); }
   .skill-info { flex: 1; position: relative; z-index: 1; }
   .skill-name { font-family:var(--sans);font-size:1rem;font-weight:700;margin-bottom:0.2rem; }
   .skill-desc { font-family:var(--mono);font-size:0.65rem;color:var(--muted);letter-spacing:0.05em; }
@@ -751,6 +765,122 @@
   }
 
 
+  /* ─── EXTRA CURRICULAR PAGE ──────────── */
+  .extra-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+    max-width: 880px;
+  }
+
+  .extra-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 1.6rem 1.8rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    text-decoration: none;
+    color: var(--text);
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.35s, transform 0.35s, box-shadow 0.35s;
+  }
+  .extra-card::before {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 2px;
+    background: var(--accent);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.4s ease;
+  }
+  .extra-card::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0;
+    width: 0; height: 1px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    transition: width 0.4s ease;
+  }
+  .extra-card:hover {
+    border-color: rgba(255,255,255,0.5);
+    transform: translateX(6px);
+    box-shadow: -4px 0 30px rgba(255,255,255,0.08);
+  }
+  .extra-card:hover::before { transform: scaleY(1); }
+  .extra-card:hover::after { width: 100%; }
+
+  .extra-logo {
+    width: 70px;
+    height: 70px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .extra-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 0.4rem;
+  }
+  .extra-logo-placeholder {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-align: center;
+    line-height: 1.3;
+    padding: 0.3rem;
+  }
+
+  .extra-info { flex: 1; min-width: 0; }
+  .extra-role {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+  .extra-club {
+    font-family: var(--sans);
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.01em;
+  }
+  .extra-desc {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 0.6rem;
+  }
+  .extra-link {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--accent2);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: color 0.3s, gap 0.3s;
+  }
+  .extra-link:hover { color: var(--accent); gap: 0.7rem; }
+  .extra-link::after { content: '↗'; font-size: 0.8rem; }
+
+  @media(max-width:700px) {
+    .extra-card { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .extra-logo { width: 60px; height: 60px; }
+  }
+
+
   /* ─── CONTACT PAGE ───────────────────── */
   .contact-grid {
     display: flex;
@@ -908,6 +1038,7 @@
     <li><a onclick="goTo('projects')" data-page="projects">Projects</a></li>
     <li><a onclick="goTo('exp')"      data-page="exp">Experience</a></li>
     <li><a onclick="goTo('achieve')"  data-page="achieve">Achievements</a></li>
+    <li><a onclick="goTo('extra')"    data-page="extra">Extra Curricular</a></li>
     <li><a onclick="goTo('contact')"  data-page="contact">Contact</a></li>
   </ul>
 </nav>
@@ -920,6 +1051,7 @@
   <div class="page-dot"        onclick="goTo('exp')"       data-dot="exp"></div>
   <div class="page-dot"        onclick="goTo('projects')"  data-dot="projects"></div>
   <div class="page-dot"        onclick="goTo('achieve')"   data-dot="achieve"></div>
+  <div class="page-dot"        onclick="goTo('extra')"     data-dot="extra"></div>
   <div class="page-dot"        onclick="goTo('contact')" data-dot="contact"></div>
 </div>
 
@@ -1039,25 +1171,25 @@
       <div class="skill-panels">
         <div class="skill-panel active" id="panel-languages">
           <div class="skill-items">
-            <div class="skill-item" style="--fill:55%"><div class="skill-icon"><img src="assets/logos/c.jpg" alt="C"></div><div class="skill-info"><div class="skill-name">C</div><div class="skill-desc">Systems programming · Problem solving</div></div><div class="skill-level familiar">Familiar</div></div>
-            <div class="skill-item" style="--fill:60%"><div class="skill-icon"><img src="assets/logos/python.jpg" alt="Python"></div><div class="skill-info"><div class="skill-name">Python</div><div class="skill-desc">Data scripts · Engineering calculations</div></div><div class="skill-level learning">Learning</div></div>
-            <div class="skill-item" style="--fill:45%"><div class="skill-icon"><img src="assets/logos/html.jpg" alt="HTML"></div><div class="skill-info"><div class="skill-name">HTML</div><div class="skill-desc">Web structure · Markup</div></div><div class="skill-level familiar">Learning</div></div>
-            <div class="skill-item" style="--fill:40%"><div class="skill-icon"><img src="assets/logos/css.jpg" alt="CSS"></div><div class="skill-info"><div class="skill-name">CSS</div><div class="skill-desc">Styling · Layouts</div></div><div class="skill-level familiar">Learning</div></div>
+            <div class="skill-item" style="--fill:55%"><div class="skill-icon"><span class="skill-tag-icon">C</span></div><div class="skill-info"><div class="skill-name">C</div><div class="skill-desc">Systems programming · Problem solving</div></div><div class="skill-level familiar">Familiar</div></div>
+            <div class="skill-item" style="--fill:60%"><div class="skill-icon"><span class="skill-tag-icon">Py</span></div><div class="skill-info"><div class="skill-name">Python</div><div class="skill-desc">Data scripts · Engineering calculations</div></div><div class="skill-level learning">Learning</div></div>
+            <div class="skill-item" style="--fill:45%"><div class="skill-icon"><span class="skill-tag-icon">&lt;/&gt;</span></div><div class="skill-info"><div class="skill-name">HTML</div><div class="skill-desc">Web structure · Markup</div></div><div class="skill-level familiar">Learning</div></div>
+            <div class="skill-item" style="--fill:40%"><div class="skill-icon"><span class="skill-tag-icon">#</span></div><div class="skill-info"><div class="skill-name">CSS</div><div class="skill-desc">Styling · Layouts</div></div><div class="skill-level familiar">Learning</div></div>
           </div>
         </div>
         <div class="skill-panel" id="panel-data">
           <div class="skill-items">
-            <div class="skill-item" style="--fill:55%"><div class="skill-icon"><img src="assets/logos/pandas.jpg" alt="Pandas"></div><div class="skill-info"><div class="skill-name">Pandas</div><div class="skill-desc">DataFrames · Filtering · Groupby · Analysis</div></div><div class="skill-level learning">Learning</div></div>
-            <div class="skill-item" style="--fill:45%"><div class="skill-icon"><img src="assets/logos/matplotlib.jpg" alt="Matplotlib"></div><div class="skill-info"><div class="skill-name">Matplotlib</div><div class="skill-desc">Plots · Engineering charts</div></div><div class="skill-level learning">Learning</div></div>
-            <div class="skill-item" style="--fill:40%"><div class="skill-icon"><img src="assets/logos/seaborn.jpg" alt="Seaborn"></div><div class="skill-info"><div class="skill-name">Seaborn</div><div class="skill-desc">Statistical visualisation</div></div><div class="skill-level learning">Learning</div></div>
-            <div class="skill-item" style="--fill:50%"><div class="skill-icon"><img src="assets/logos/coolprop.jpg" alt="CoolProp"></div><div class="skill-info"><div class="skill-name">CoolProp</div><div class="skill-desc">Thermophysical properties · Refrigeration cycles</div></div><div class="skill-level learning">Learning</div></div>
+            <div class="skill-item" style="--fill:55%"><div class="skill-icon"><span class="skill-tag-icon">pd</span></div><div class="skill-info"><div class="skill-name">Pandas</div><div class="skill-desc">DataFrames · Filtering · Groupby · Analysis</div></div><div class="skill-level learning">Learning</div></div>
+            <div class="skill-item" style="--fill:45%"><div class="skill-icon">📊</div><div class="skill-info"><div class="skill-name">Matplotlib</div><div class="skill-desc">Plots · Engineering charts</div></div><div class="skill-level learning">Learning</div></div>
+            <div class="skill-item" style="--fill:40%"><div class="skill-icon">📈</div><div class="skill-info"><div class="skill-name">Seaborn</div><div class="skill-desc">Statistical visualisation</div></div><div class="skill-level learning">Learning</div></div>
+            <div class="skill-item" style="--fill:50%"><div class="skill-icon">❄️</div><div class="skill-info"><div class="skill-name">CoolProp</div><div class="skill-desc">Thermophysical properties · Refrigeration cycles</div></div><div class="skill-level learning">Learning</div></div>
           </div>
         </div>
         <div class="skill-panel" id="panel-tools">
           <div class="skill-items">
-            <div class="skill-item" style="--fill:78%"><div class="skill-icon"><img src="assets/logos/autocad.jpg" alt="AutoCAD"></div><div class="skill-info"><div class="skill-name">AutoCAD</div><div class="skill-desc">2D/3D engineering drawings · Technical drafting</div></div><div class="skill-level confident">Confident</div></div>
-            <div class="skill-item" style="--fill:72%"><div class="skill-icon"><img src="assets/logos/solidworks.jpg" alt="SolidWorks"></div><div class="skill-info"><div class="skill-name">SolidWorks</div><div class="skill-desc">3D modelling · Part assembly · Simulation</div></div><div class="skill-level confident">Confident</div></div>
-            <div class="skill-item" style="--fill:42%"><div class="skill-icon"><img src="assets/logos/comsol.jpg" alt="COMSOL"></div><div class="skill-info"><div class="skill-name">COMSOL</div><div class="skill-desc">Multiphysics simulation · FEM analysis</div></div><div class="skill-level familiar">Learning</div></div>
+            <div class="skill-item" style="--fill:78%"><div class="skill-icon">📐</div><div class="skill-info"><div class="skill-name">AutoCAD</div><div class="skill-desc">2D/3D engineering drawings · Technical drafting</div></div><div class="skill-level confident">Confident</div></div>
+            <div class="skill-item" style="--fill:72%"><div class="skill-icon">🔩</div><div class="skill-info"><div class="skill-name">SolidWorks</div><div class="skill-desc">3D modelling · Part assembly · Simulation</div></div><div class="skill-level confident">Confident</div></div>
+            <div class="skill-item" style="--fill:42%"><div class="skill-icon">🌡️</div><div class="skill-info"><div class="skill-name">COMSOL</div><div class="skill-desc">Multiphysics simulation · FEM analysis</div></div><div class="skill-level familiar">Learning</div></div>
           </div>
         </div>
         <div class="skill-panel" id="panel-knowledge">
@@ -1348,11 +1480,71 @@
   <div class="page-footer"><div class="footer-left"><span>// ADITTYA DAS</span></div></div>
 </div>
 
-  <!-- ═══════ CONTACT PAGE ═══════ -->
-<div class="page hidden" id="page-contact">
+  <!-- ═══════ EXTRA CURRICULAR PAGE ═══════ -->
+<div class="page hidden" id="page-extra">
   <div class="page-inner">
     <div class="section-header">
       <span class="section-num">06</span>
+      <h2 class="section-title">Extra Curricular Activities</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="extra-grid stagger">
+
+      <div class="extra-card">
+        <div class="extra-logo">
+          <!-- Replace src below with your club logo file path -->
+          <img src="assets/BAC.png" alt="BUET Automobile Club"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+          <div class="extra-logo-placeholder" style="display:none;">BUET<br>AUTO<br>CLUB</div>
+        </div>
+        <div class="extra-info">
+          <div class="extra-role">// Marketing Executive</div>
+          <div class="extra-club">BUET Automobile Club</div>
+          <div class="extra-desc">A student-run club at BUET focused on automotive engineering, motorsports culture, and hands-on vehicle projects.</div>
+          <a class="extra-link" href="https://buetautomobile.club/" target="_blank" rel="noopener">Visit Website</a>
+        </div>
+      </div>
+
+      <div class="extra-card">
+        <div class="extra-logo">
+          <!-- Replace src below with your club logo file path -->
+          <img src="assets/BRS.jpg" alt="BUET Robotics Society"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+          <div class="extra-logo-placeholder" style="display:none;">BUET<br>ROBOTICS<br>SOC</div>
+        </div>
+        <div class="extra-info">
+          <div class="extra-role">// Executive Member</div>
+          <div class="extra-club">BUET Robotics Society</div>
+          <div class="extra-desc">A platform for BUET students to design, build, and compete with robots — covering everything from line-followers to combat and soccer bots.</div>
+          <a class="extra-link" href="https://brs-buet.com/" target="_blank" rel="noopener">Visit Website</a>
+        </div>
+      </div>
+
+      <div class="extra-card">
+        <div class="extra-logo">
+          
+          <img src="assets/AASHRAE.jpg" alt="ASHRAE BUET Branch"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+          <div class="extra-logo-placeholder" style="display:none;">ASHRAE<br>BUET</div>
+        </div>
+        <div class="extra-info">
+          <div class="extra-role">// Associate Coordinator</div>
+          <div class="extra-club">ASHRAE BUET Branch</div>
+          <div class="extra-desc">The student chapter of ASHRAE at BUET, dedicated to advancing HVAC&amp;R, building energy systems, and sustainable thermal engineering.</div>
+          <a class="extra-link" href="https://ashrae-buet-sb.vercel.app/" target="_blank" rel="noopener">Visit Website</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="page-footer"><div class="footer-left"><span>// ADITTYA DAS</span></div></div>
+</div>
+
+  
+<div class="page hidden" id="page-contact">
+  <div class="page-inner">
+    <div class="section-header">
+      <span class="section-num">07</span>
       <h2 class="section-title">Contact</h2>
       <div class="section-line"></div>
     </div>
@@ -1403,7 +1595,7 @@
 
 <script>
   // ─── ALL PAGES (including project detail pages) ──────────────────
-  const pages = ['home','about','skills','projects','exp','achieve','contact','proj-battlebot','proj-soccerbot'];
+  const pages = ['home','about','skills','projects','exp','achieve','extra','contact','proj-battlebot','proj-soccerbot'];
   let current   = 'home';
   let animating = false;
 
@@ -1585,7 +1777,7 @@
   // ─── KEYBOARD NAVIGATION ────────────────────────────
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeLightbox();
-    const mainPages = ['home','about','skills','projects','exp','achieve'];
+    const mainPages = ['home','about','skills','projects','exp','achieve','extra','contact'];
     const idx = mainPages.indexOf(current);
     if (idx === -1) return; // don't keyboard-nav when on a project detail
     if ((e.key === 'ArrowRight' || e.key === 'ArrowDown') && idx < mainPages.length - 1) goTo(mainPages[idx + 1]);
